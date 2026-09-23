@@ -15,16 +15,23 @@ const program = new Command();
 program
   .name('prome')
   .description('Persistent, flat-token project memory CLI for AI coding agents')
-  .version('0.1.2');
+  .version('0.1.3');
 
 // init command
 program
   .command('init')
   .description('Initialize Prome memory in the current project (silent and idempotent)')
   .option('-a, --adapter <adapter>', 'Specify agent adapter to install (e.g. antigravity, claude-code)')
+  .option('--skills <skills...>', 'Install specified skills during initialization')
+  .option('--all-skills', 'Install all curated built-in skills during initialization')
   .option('--json', 'Output result as JSON')
   .action(async (opts) => {
-    await runInit({ json: opts.json, adapter: opts.adapter });
+    await runInit({
+      json: opts.json,
+      adapter: opts.adapter,
+      skills: opts.skills,
+      allSkills: opts.allSkills,
+    });
   });
 
 // status command
@@ -101,12 +108,19 @@ program
 
 // install command
 program
-  .command('install <skill>')
-  .description('Install a skill from a local path or git URL')
+  .command('install [skill]')
+  .description('Install a built-in skill, local path, or git repository into project skills')
+  .option('-l, --list', 'List all available built-in skills')
+  .option('--all', 'Install all curated built-in skills')
   .option('-n, --name <name>', 'Custom skill destination name')
   .option('--json', 'Output result as JSON')
   .action(async (skill, opts) => {
-    await runInstall(skill, { name: opts.name, json: opts.json });
+    await runInstall(skill, {
+      name: opts.name,
+      json: opts.json,
+      list: opts.list,
+      all: opts.all,
+    });
   });
 
 // context command (for agent session start / stop hooks)
@@ -125,4 +139,3 @@ program
   });
 
 program.parse(process.argv);
-
