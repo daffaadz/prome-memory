@@ -15,7 +15,7 @@ const program = new Command();
 program
   .name('prome')
   .description('Persistent, flat-token project memory CLI for AI coding agents')
-  .version('0.1.0');
+  .version('0.1.1');
 
 // init command
 program
