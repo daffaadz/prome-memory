@@ -14,3 +14,4 @@ Briefly describe the change and the problem it solves.
 - [ ] Code formatted (`pnpm run format`)
 - [ ] Conventional Commit format used in commit messages
 - [ ] Documentation updated if relevant
+

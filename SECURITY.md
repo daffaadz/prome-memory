@@ -18,3 +18,4 @@ Please provide:
 - Any suggested fixes or mitigations.
 
 We will acknowledge receipt within 48 hours and work with you to resolve the issue before disclosing it publicly.
+
