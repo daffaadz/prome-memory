@@ -1,39 +1,35 @@
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
 import {
   StateFrontmatter,
   StateFrontmatterSchema,
   StateFileContent,
-} from "./schemas.js";
+} from './schemas.js';
 
 export function getStateFilePath(projectRoot: string): string {
-  return path.join(projectRoot, ".prome", "memory", "state.md");
+  return path.join(projectRoot, '.prome', 'memory', 'state.md');
 }
 
 export function readStateFile(projectRoot: string): StateFileContent {
   const filePath = getStateFilePath(projectRoot);
   if (!fs.existsSync(filePath)) {
-    throw new Error(
-      `state.md not found at ${filePath}. Run 'prome init' first.`,
-    );
+    throw new Error(`state.md not found at ${filePath}. Run 'prome init' first.`);
   }
 
-  const rawContent = fs.readFileSync(filePath, "utf-8");
+  const rawContent = fs.readFileSync(filePath, 'utf-8');
   let parsed: matter.GrayMatterFile<string>;
   try {
     parsed = matter(rawContent);
   } catch (err) {
-    throw new Error(
-      `Failed to parse frontmatter in state.md: ${err instanceof Error ? err.message : String(err)}`,
-    );
+    throw new Error(`Failed to parse frontmatter in state.md: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   const parseResult = StateFrontmatterSchema.safeParse(parsed.data);
   if (!parseResult.success) {
     const errorDetails = parseResult.error.errors
-      .map((e) => `${e.path.join(".")}: ${e.message}`)
-      .join(", ");
+      .map((e) => `${e.path.join('.')}: ${e.message}`)
+      .join(', ');
     throw new Error(`Invalid state.md frontmatter schema: ${errorDetails}`);
   }
 
@@ -46,16 +42,14 @@ export function readStateFile(projectRoot: string): StateFileContent {
 export function writeStateFile(
   projectRoot: string,
   frontmatter: StateFrontmatter,
-  body: string,
+  body: string
 ): void {
   const parseResult = StateFrontmatterSchema.safeParse(frontmatter);
   if (!parseResult.success) {
     const errorDetails = parseResult.error.errors
-      .map((e) => `${e.path.join(".")}: ${e.message}`)
-      .join(", ");
-    throw new Error(
-      `Cannot write state.md: Invalid frontmatter schema: ${errorDetails}`,
-    );
+      .map((e) => `${e.path.join('.')}: ${e.message}`)
+      .join(', ');
+    throw new Error(`Cannot write state.md: Invalid frontmatter schema: ${errorDetails}`);
   }
 
   const filePath = getStateFilePath(projectRoot);
@@ -65,7 +59,7 @@ export function writeStateFile(
   }
 
   const fileString = matter.stringify(`\n${body.trim()}\n`, parseResult.data);
-  fs.writeFileSync(filePath, fileString, "utf-8");
+  fs.writeFileSync(filePath, fileString, 'utf-8');
 }
 
 export function initStateFile(projectRoot: string): void {
@@ -80,7 +74,7 @@ export function initStateFile(projectRoot: string): void {
 
 export function touchStateFile(
   projectRoot: string,
-  newBody?: string,
+  newBody?: string
 ): StateFileContent {
   const current = readStateFile(projectRoot);
   const updatedFrontmatter: StateFrontmatter = {
@@ -105,3 +99,4 @@ export function incrementSessionCount(projectRoot: string): number {
   writeStateFile(projectRoot, updatedFrontmatter, current.body);
   return updatedFrontmatter.session_count;
 }
+

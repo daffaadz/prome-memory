@@ -1,39 +1,35 @@
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
 import {
   CoreFrontmatter,
   CoreFrontmatterSchema,
   CoreFileContent,
-} from "./schemas.js";
+} from './schemas.js';
 
 export function getCoreFilePath(projectRoot: string): string {
-  return path.join(projectRoot, ".prome", "memory", "core.md");
+  return path.join(projectRoot, '.prome', 'memory', 'core.md');
 }
 
 export function readCoreFile(projectRoot: string): CoreFileContent {
   const filePath = getCoreFilePath(projectRoot);
   if (!fs.existsSync(filePath)) {
-    throw new Error(
-      `core.md not found at ${filePath}. Run 'prome init' first.`,
-    );
+    throw new Error(`core.md not found at ${filePath}. Run 'prome init' first.`);
   }
 
-  const rawContent = fs.readFileSync(filePath, "utf-8");
+  const rawContent = fs.readFileSync(filePath, 'utf-8');
   let parsed: matter.GrayMatterFile<string>;
   try {
     parsed = matter(rawContent);
   } catch (err) {
-    throw new Error(
-      `Failed to parse frontmatter in core.md: ${err instanceof Error ? err.message : String(err)}`,
-    );
+    throw new Error(`Failed to parse frontmatter in core.md: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   const parseResult = CoreFrontmatterSchema.safeParse(parsed.data);
   if (!parseResult.success) {
     const errorDetails = parseResult.error.errors
-      .map((e) => `${e.path.join(".")}: ${e.message}`)
-      .join(", ");
+      .map((e) => `${e.path.join('.')}: ${e.message}`)
+      .join(', ');
     throw new Error(`Invalid core.md frontmatter schema: ${errorDetails}`);
   }
 
@@ -46,16 +42,14 @@ export function readCoreFile(projectRoot: string): CoreFileContent {
 export function writeCoreFile(
   projectRoot: string,
   frontmatter: CoreFrontmatter,
-  body: string,
+  body: string
 ): void {
   const parseResult = CoreFrontmatterSchema.safeParse(frontmatter);
   if (!parseResult.success) {
     const errorDetails = parseResult.error.errors
-      .map((e) => `${e.path.join(".")}: ${e.message}`)
-      .join(", ");
-    throw new Error(
-      `Cannot write core.md: Invalid frontmatter schema: ${errorDetails}`,
-    );
+      .map((e) => `${e.path.join('.')}: ${e.message}`)
+      .join(', ');
+    throw new Error(`Cannot write core.md: Invalid frontmatter schema: ${errorDetails}`);
   }
 
   const filePath = getCoreFilePath(projectRoot);
@@ -65,31 +59,29 @@ export function writeCoreFile(
   }
 
   const fileString = matter.stringify(`\n${body.trim()}\n`, parseResult.data);
-  fs.writeFileSync(filePath, fileString, "utf-8");
+  fs.writeFileSync(filePath, fileString, 'utf-8');
 }
 
 export function initCoreFile(
   projectRoot: string,
   projectName: string,
-  initialBody?: string,
+  initialBody?: string
 ): void {
   const now = new Date().toISOString();
-  const defaultBody =
-    initialBody ||
-    `## Tujuan\n\n## Constraint keras\n\n## Design system / stack awal\n\n## Non-goals`;
+  const defaultBody = initialBody || `## Tujuan\n\n## Constraint keras\n\n## Design system / stack awal\n\n## Non-goals`;
   const frontmatter: CoreFrontmatter = {
     project: projectName,
     created: now,
     version: 1,
-    status: "uninitialized",
+    status: 'uninitialized',
   };
   writeCoreFile(projectRoot, frontmatter, defaultBody);
 }
 
 export function amendCoreFile(
   projectRoot: string,
-  updates: Partial<Omit<CoreFrontmatter, "created" | "version">>,
-  newBody?: string,
+  updates: Partial<Omit<CoreFrontmatter, 'created' | 'version'>>,
+  newBody?: string
 ): CoreFileContent {
   const current = readCoreFile(projectRoot);
   const updatedFrontmatter: CoreFrontmatter = {
@@ -104,3 +96,4 @@ export function amendCoreFile(
     body,
   };
 }
+

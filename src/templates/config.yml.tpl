@@ -5,3 +5,4 @@ compaction:
   threshold: 20
 recall:
   mode: grep
+

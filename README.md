@@ -4,7 +4,7 @@
 > Zero-maintenance, anti-hallucination, local-first.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](<>)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
 
 ---
 
@@ -31,7 +31,6 @@ npx prome init
 ```
 
 That's it! Prome automatically:
-
 - Creates `.prome/memory/` containing `core.md`, `state.md`, and `decisions.jsonl`
 - Detects installed agent tools (Claude Code, Antigravity, etc.)
 - Automatically installs agent hooks and memory skill protocols
@@ -69,16 +68,16 @@ In all future sessions, the agent automatically loads `core.md` and `state.md` a
 
 All commands support `--json` for machine-readable agent automation:
 
-| Command                 | Description                                                                      |
-| ----------------------- | -------------------------------------------------------------------------------- |
-| `prome init`            | Silent, idempotent initialization. Sets up `.prome/` and hooks.                  |
-| `prome status`          | Displays memory health, file sizes, decision counts, and compaction triggers.    |
-| `prome amend`           | Updates `core.md` and increments the project version.                            |
-| `prome compact`         | Compacts uncompacted decisions into `state.md` while keeping raw decision logs.  |
-| `prome recall <query>`  | Structured grep across `decisions.jsonl` by keyword, `--type`, or `--ref`.       |
+| Command | Description |
+|---|---|
+| `prome init` | Silent, idempotent initialization. Sets up `.prome/` and hooks. |
+| `prome status` | Displays memory health, file sizes, decision counts, and compaction triggers. |
+| `prome amend` | Updates `core.md` and increments the project version. |
+| `prome compact` | Compacts uncompacted decisions into `state.md` while keeping raw decision logs. |
+| `prome recall <query>` | Structured grep across `decisions.jsonl` by keyword, `--type`, or `--ref`. |
 | `prome remember <json>` | Appends a structured decision with an auto-increment ID (`d-0001`, `d-0002`...). |
-| `prome install <skill>` | Copies or clones a skill package from a local path or git URL.                   |
-| `prome context`         | Context injection helper for agent `SessionStart` and `Stop` hooks.              |
+| `prome install <skill>` | Copies or clones a skill package from a local path or git URL. |
+| `prome context` | Context injection helper for agent `SessionStart` and `Stop` hooks. |
 
 ---
 
@@ -107,7 +106,6 @@ All commands support `--json` for machine-readable agent automation:
 ## Compaction & Anti-Amnesia
 
 As your project grows, decisions are logged to `decisions.jsonl`. When `session_count` reaches threshold (default 20) or `state.md` exceeds 4KB:
-
 - Prome condenses recent decisions into `state.md`.
 - The decisions are marked `compacted: true`.
 - **Raw lines in `decisions.jsonl` are never deleted!** The agent can still query any historical decision using `prome recall`.
@@ -117,7 +115,6 @@ As your project grows, decisions are logged to `decisions.jsonl`. When `session_
 ## Explicit MVP Boundaries (Not Yet Implemented)
 
 To maintain extreme focus and reliability, the following features are intentionally out of scope for the MVP:
-
 - Vector-based semantic database / embeddings recall (planned for v0.2)
 - Centralized skill registry server (use local paths or git URLs)
 - Web UI dashboard
@@ -128,3 +125,4 @@ To maintain extreme focus and reliability, the following features are intentiona
 ## License
 
 [MIT](LICENSE) © Prome Contributors
+

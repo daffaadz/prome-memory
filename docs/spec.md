@@ -32,9 +32,7 @@ Prome dibangun di atas 3 pilar non-negotiable:
 Semua file divalidasi ketat menggunakan schema (Zod). Parsing yang gagal akan melempar error eksplisit (fail loudly) untuk mencegah silent corruption pada memori project.
 
 ### 2.1 `core.md` (`.prome/memory/core.md`)
-
 Menyimpan fondasi dan batasan absolut project.
-
 ```markdown
 ---
 project: <nama-project>
@@ -53,9 +51,7 @@ status: uninitialized | initialized
 ```
 
 ### 2.2 `state.md` (`.prome/memory/state.md`)
-
 Menyimpan ringkasan arsitektur terkini dan konvensi aktif yang dijaga flat melalui compaction.
-
 ```markdown
 ---
 last_updated: <ISO8601>
@@ -72,20 +68,9 @@ session_count: <int>
 ```
 
 ### 2.3 `decisions.jsonl` (`.prome/memory/decisions.jsonl`)
-
 Log append-only yang mencatat seluruh keputusan granular. Setiap baris adalah objek JSON valid.
-
 ```json
-{
-  "id": "d-0001",
-  "ts": "2026-09-23T10:00:00.000Z",
-  "type": "architecture",
-  "summary": "Adopt Vitest",
-  "reason": "Fast ESM runner",
-  "ref": ["vitest.config.ts"],
-  "supersedes": null,
-  "compacted": false
-}
+{"id":"d-0001","ts":"2026-09-23T10:00:00.000Z","type":"architecture","summary":"Adopt Vitest","reason":"Fast ESM runner","ref":["vitest.config.ts"],"supersedes":null,"compacted":false}
 ```
 
 - `type`: `architecture` | `convention` | `scope`
@@ -93,7 +78,6 @@ Log append-only yang mencatat seluruh keputusan granular. Setiap baris adalah ob
 - `compacted`: boolean (diubah menjadi `true` setelah masuk ringkasan `state.md`; baris mentah **TIDAK PERNAH DIHAPUS**)
 
 ### 2.4 `config.yml` (`.prome/config.yml`)
-
 ```yaml
 prome_version: 1
 agent_adapters: []
@@ -108,16 +92,16 @@ recall:
 
 ## 3. Spesifikasi CLI Commands
 
-| Command                 | Perilaku Wajib                                                                                                                                                                                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prome init`            | Silent dan idempotent. Membuat folder `.prome/memory/` dan `.prome/skills/`. Menulis file awal (`core.md`, `state.md`, `decisions.jsonl`, `config.yml`). Mendeteksi tools yang terpasang (`.claude/`, `.agent/`, `.gemini/`) dan memasang hook adapter yang sesuai. |
-| `prome status`          | Menampilkan dashboard metrik: status core (`uninitialized` vs `initialized`), ukuran byte `state.md`, jumlah total keputusan, breakdown compacted vs pending, status threshold compaction.                                                                          |
-| `prome amend`           | Memperbarui `core.md`, menaikkan nomor versi (`version: n + 1`). Dapat membuka editor sistem atau menerima flag `--status`, `--set-initialized`, `--body`.                                                                                                          |
-| `prome compact`         | Menjalankan algoritma compaction untuk menyaring entri `compacted: false` ke dalam `state.md`, menandai entri sebagai `compacted: true`, dan mereset session count.                                                                                                 |
-| `prome recall <query>`  | Grep terstruktur pada `decisions.jsonl`. Mendukung filter `--type`, `--ref`, `--all`. Dirancang untuk dipanggil oleh coding agent.                                                                                                                                  |
-| `prome remember <json>` | Append terstruktur ke `decisions.jsonl` dengan auto-increment ID (`d-0001`, `d-0002`...). Memvalidasi Zod schema sebelum menulis, dan mengupdate timestamp `state.md`.                                                                                              |
-| `prome install <skill>` | Meng-copy skill dari path lokal atau meng-clone dari URL git ke `.prome/skills/` dan adapter target (misal `.agent/skills/`).                                                                                                                                       |
-| `prome context`         | Menyediakan konteks terformat untuk injeksi sesi (`--inject`) atau memperbarui timestamp/session counter (`--update-if-changed`).                                                                                                                                   |
+| Command | Perilaku Wajib |
+|---|---|
+| `prome init` | Silent dan idempotent. Membuat folder `.prome/memory/` dan `.prome/skills/`. Menulis file awal (`core.md`, `state.md`, `decisions.jsonl`, `config.yml`). Mendeteksi tools yang terpasang (`.claude/`, `.agent/`, `.gemini/`) dan memasang hook adapter yang sesuai. |
+| `prome status` | Menampilkan dashboard metrik: status core (`uninitialized` vs `initialized`), ukuran byte `state.md`, jumlah total keputusan, breakdown compacted vs pending, status threshold compaction. |
+| `prome amend` | Memperbarui `core.md`, menaikkan nomor versi (`version: n + 1`). Dapat membuka editor sistem atau menerima flag `--status`, `--set-initialized`, `--body`. |
+| `prome compact` | Menjalankan algoritma compaction untuk menyaring entri `compacted: false` ke dalam `state.md`, menandai entri sebagai `compacted: true`, dan mereset session count. |
+| `prome recall <query>` | Grep terstruktur pada `decisions.jsonl`. Mendukung filter `--type`, `--ref`, `--all`. Dirancang untuk dipanggil oleh coding agent. |
+| `prome remember <json>` | Append terstruktur ke `decisions.jsonl` dengan auto-increment ID (`d-0001`, `d-0002`...). Memvalidasi Zod schema sebelum menulis, dan mengupdate timestamp `state.md`. |
+| `prome install <skill>` | Meng-copy skill dari path lokal atau meng-clone dari URL git ke `.prome/skills/` dan adapter target (misal `.agent/skills/`). |
+| `prome context` | Menyediakan konteks terformat untuk injeksi sesi (`--inject`) atau memperbarui timestamp/session counter (`--update-if-changed`). |
 
 Semua command mendukung flag `--json` untuk integrasi machine-to-machine dengan AI agent.
 
@@ -174,14 +158,13 @@ baru, perubahan scope):
 ## 6. Batasan MVP & Roadmap Masa Depan
 
 ### Tidak Diimplementasikan pada MVP:
-
 - Vector-based semantic search & embeddings database
 - Server registry skill terpusat
 - Web UI dashboard
 - Sinkronisasi realtime multi-user via cloud backend
 
 ### Fokus MVP:
-
 - Local file-based storage yang cepat, andal, dan dapat diuji 100% secara lokal.
 - CLI lengkap dengan flag `--json`.
 - Integrasi otomatis untuk Claude Code, Google Antigravity, dan Generic Fallback.
+

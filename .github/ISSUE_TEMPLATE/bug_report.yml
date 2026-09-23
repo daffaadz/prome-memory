@@ -1,0 +1,55 @@
+name: 🐛 Bug Report
+description: File a bug report to help us improve Prome
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Please check existing issues first to avoid duplicates.
+  - type: input
+    id: environment
+    attributes:
+      label: Environment Info
+      description: What OS, Node.js version, and Prome version are you using?
+      placeholder: "e.g., Windows 11 / macOS Sonoma, Node v20.12.0, prome v0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: agent-tool
+    attributes:
+      label: AI Coding Agent / Tool
+      description: Which coding agent were you using with Prome?
+      options:
+        - Claude Code
+        - Google Antigravity
+        - Cursor
+        - Windsurf
+        - GitHub Copilot
+        - Aider
+        - Other (CLI only)
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce
+      description: Steps or commands to reproduce the behavior.
+      placeholder: |
+        1. Run `prome init`
+        2. Run `prome remember ...`
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output or Screenshots
+      description: Paste terminal output or error stack traces here.
+      render: shell

@@ -1,9 +1,9 @@
-import fs from "node:fs";
-import path from "node:path";
-import { Adapter } from "./adapter.interface.js";
+import fs from 'node:fs';
+import path from 'node:path';
+import { Adapter } from './adapter.interface.js';
 
 export class GenericFallbackAdapter implements Adapter {
-  name = "generic-fallback";
+  name = 'generic-fallback';
 
   detect(_projectRoot: string): boolean {
     return true; // Always available as fallback
@@ -43,13 +43,13 @@ baru, perubahan scope):
   }
 
   async installHooks(projectRoot: string): Promise<void> {
-    const promeDir = path.join(projectRoot, ".prome");
+    const promeDir = path.join(projectRoot, '.prome');
     if (!fs.existsSync(promeDir)) {
       fs.mkdirSync(promeDir, { recursive: true });
     }
 
-    const injectFilePath = path.join(promeDir, "inject.md");
-    fs.writeFileSync(injectFilePath, this.injectMemoryTemplate(), "utf-8");
+    const injectFilePath = path.join(promeDir, 'inject.md');
+    fs.writeFileSync(injectFilePath, this.injectMemoryTemplate(), 'utf-8');
   }
 
   getManualInstructions(): string {
@@ -59,3 +59,4 @@ To enable Prome memory in your tool (Cursor, Copilot, Windsurf, Aider, etc.):
 Add the instructions in '.prome/inject.md' or reference '.prome/memory/core.md' in your system prompt or rules file (e.g. .cursorrules).`;
   }
 }
+

@@ -1,0 +1,27 @@
+name: 💡 Feature Request
+description: Suggest an idea or new adapter for Prome
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We appreciate feedback and proposals! Please describe your use case clearly.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Motivation
+      description: Is your feature request related to a problem or limitation?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution / Feature
+      description: Describe what you want to happen and how it adheres to Prome's core principles (Local-first, Flat-token, Minimal-touch).
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions or workarounds you have considered.

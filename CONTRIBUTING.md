@@ -7,7 +7,6 @@ Thank you for contributing to Prome! This guide will help you understand the arc
 ## 1. Development Setup
 
 Prerequisites:
-
 - Node.js ≥ 18
 - pnpm ≥ 9
 
@@ -49,7 +48,7 @@ export interface Adapter {
    Implement `installHooks(projectRoot: string)` ensuring:
    - Existing user configuration is **never overwritten or destroyed**.
    - Custom keys/settings are merged safely.
-     Implement `injectMemoryTemplate()` with the mandatory conditional interview & remember instructions.
+   Implement `injectMemoryTemplate()` with the mandatory conditional interview & remember instructions.
 
 2. **Register the adapter in detection logic**:
    Add the new adapter class to `getKnownAdapters()` in `src/core/detect-tool.ts`.
@@ -68,9 +67,9 @@ export interface Adapter {
 ## 3. Commit Guidelines
 
 Prome follows [Conventional Commits](https://www.conventionalcommits.org/):
-
 - `feat:` for new user-facing features or commands
 - `fix:` for bug fixes
 - `docs:` for documentation updates
 - `test:` for adding or improving test coverage
 - `refactor:` for code cleanups without functional changes
+

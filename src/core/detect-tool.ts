@@ -1,7 +1,7 @@
-import { Adapter } from "./adapters/adapter.interface.js";
-import { ClaudeCodeAdapter } from "./adapters/claude-code.js";
-import { AntigravityAdapter } from "./adapters/antigravity.js";
-import { GenericFallbackAdapter } from "./adapters/generic-fallback.js";
+import { Adapter } from './adapters/adapter.interface.js';
+import { ClaudeCodeAdapter } from './adapters/claude-code.js';
+import { AntigravityAdapter } from './adapters/antigravity.js';
+import { GenericFallbackAdapter } from './adapters/generic-fallback.js';
 
 export function getKnownAdapters(): Adapter[] {
   return [new ClaudeCodeAdapter(), new AntigravityAdapter()];
@@ -15,3 +15,4 @@ export function detectAdapters(projectRoot: string): Adapter[] {
   }
   return detected;
 }
+

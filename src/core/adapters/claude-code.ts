@@ -1,13 +1,13 @@
-import fs from "node:fs";
-import path from "node:path";
-import { Adapter } from "./adapter.interface.js";
+import fs from 'node:fs';
+import path from 'node:path';
+import { Adapter } from './adapter.interface.js';
 
 export class ClaudeCodeAdapter implements Adapter {
-  name = "claude-code";
+  name = 'claude-code';
 
   detect(projectRoot: string): boolean {
-    const claudeDir = path.join(projectRoot, ".claude");
-    const claudeJson = path.join(projectRoot, ".claude.json");
+    const claudeDir = path.join(projectRoot, '.claude');
+    const claudeJson = path.join(projectRoot, '.claude.json');
     return fs.existsSync(claudeDir) || fs.existsSync(claudeJson);
   }
 
@@ -40,21 +40,21 @@ baru, perubahan scope):
   }
 
   async installHooks(projectRoot: string): Promise<void> {
-    const claudeDir = path.join(projectRoot, ".claude");
+    const claudeDir = path.join(projectRoot, '.claude');
     if (!fs.existsSync(claudeDir)) {
       fs.mkdirSync(claudeDir, { recursive: true });
     }
 
-    const settingsPath = path.join(claudeDir, "settings.json");
+    const settingsPath = path.join(claudeDir, 'settings.json');
     let settings: Record<string, any> = {};
 
     if (fs.existsSync(settingsPath)) {
       try {
-        const content = fs.readFileSync(settingsPath, "utf-8");
+        const content = fs.readFileSync(settingsPath, 'utf-8');
         settings = JSON.parse(content);
       } catch (err) {
         throw new Error(
-          `Failed to parse existing .claude/settings.json: ${err instanceof Error ? err.message : String(err)}`,
+          `Failed to parse existing .claude/settings.json: ${err instanceof Error ? err.message : String(err)}`
         );
       }
     }
@@ -63,18 +63,15 @@ baru, perubahan scope):
     const currentHooks = settings.hooks || {};
     settings.hooks = {
       ...currentHooks,
-      SessionStart: "prome context --inject",
-      Stop: "prome context --update-if-changed",
+      SessionStart: 'prome context --inject',
+      Stop: 'prome context --update-if-changed',
     };
 
-    fs.writeFileSync(
-      settingsPath,
-      JSON.stringify(settings, null, 2) + "\n",
-      "utf-8",
-    );
+    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
 
     // Also write PROME_INSTRUCTIONS.md inside .claude for reference
-    const instructionsPath = path.join(claudeDir, "PROME_INSTRUCTIONS.md");
-    fs.writeFileSync(instructionsPath, this.injectMemoryTemplate(), "utf-8");
+    const instructionsPath = path.join(claudeDir, 'PROME_INSTRUCTIONS.md');
+    fs.writeFileSync(instructionsPath, this.injectMemoryTemplate(), 'utf-8');
   }
 }
+

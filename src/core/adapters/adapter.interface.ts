@@ -4,3 +4,4 @@ export interface Adapter {
   installHooks(projectRoot: string): Promise<void>;
   injectMemoryTemplate(): string;
 }
+

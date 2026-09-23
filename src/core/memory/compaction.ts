@@ -1,16 +1,19 @@
-import fs from "node:fs";
-import { Decision } from "./schemas.js";
+import fs from 'node:fs';
+import { Decision } from './schemas.js';
 import {
   readStateFile,
   writeStateFile,
   getStateFilePath,
-} from "./state-file.js";
-import { queryDecisions, markDecisionsCompacted } from "./decisions-log.js";
-import { readConfigFile } from "./config-file.js";
+} from './state-file.js';
+import {
+  queryDecisions,
+  markDecisionsCompacted,
+} from './decisions-log.js';
+import { readConfigFile } from './config-file.js';
 
 export type SummarizerFn = (
   currentStateBody: string,
-  uncompactedDecisions: Decision[],
+  uncompactedDecisions: Decision[]
 ) => Promise<string> | string;
 
 /**
@@ -19,23 +22,23 @@ export type SummarizerFn = (
  */
 export function defaultCompactState(
   currentStateBody: string,
-  uncompactedDecisions: Decision[],
+  uncompactedDecisions: Decision[]
 ): string {
   const sections: Record<string, string[]> = {
-    "Arsitektur saat ini": [],
-    "Keputusan aktif": [],
-    "Area kerja terakhir": [],
-    "Konvensi yang sudah disepakati": [],
+    'Arsitektur saat ini': [],
+    'Keputusan aktif': [],
+    'Area kerja terakhir': [],
+    'Konvensi yang sudah disepakati': [],
   };
 
   // Parse existing sections from currentStateBody
-  const lines = currentStateBody.split("\n");
-  let currentSection = "";
+  const lines = currentStateBody.split('\n');
+  let currentSection = '';
 
   for (const line of lines) {
     const trimmed = line.trim();
-    if (trimmed.startsWith("## ")) {
-      currentSection = trimmed.replace("## ", "").trim();
+    if (trimmed.startsWith('## ')) {
+      currentSection = trimmed.replace('## ', '').trim();
       if (!sections[currentSection]) {
         sections[currentSection] = [];
       }
@@ -48,17 +51,15 @@ export function defaultCompactState(
   for (const d of uncompactedDecisions) {
     const entry = `- [${d.id}] ${d.summary} (Alasan: ${d.reason})`;
 
-    if (d.type === "architecture") {
-      sections["Keputusan aktif"].push(entry);
+    if (d.type === 'architecture') {
+      sections['Keputusan aktif'].push(entry);
       if (d.ref.length > 0) {
-        sections["Arsitektur saat ini"].push(
-          `- Modul: ${d.ref.join(", ")} -> ${d.summary}`,
-        );
+        sections['Arsitektur saat ini'].push(`- Modul: ${d.ref.join(', ')} -> ${d.summary}`);
       }
-    } else if (d.type === "convention") {
-      sections["Konvensi yang sudah disepakati"].push(entry);
-    } else if (d.type === "scope") {
-      sections["Area kerja terakhir"].push(entry);
+    } else if (d.type === 'convention') {
+      sections['Konvensi yang sudah disepakati'].push(entry);
+    } else if (d.type === 'scope') {
+      sections['Area kerja terakhir'].push(entry);
     }
   }
 
@@ -71,27 +72,27 @@ export function defaultCompactState(
 
   const resultLines: string[] = [];
   const orderedSections = [
-    "Arsitektur saat ini",
-    "Keputusan aktif",
-    "Area kerja terakhir",
-    "Konvensi yang sudah disepakati",
+    'Arsitektur saat ini',
+    'Keputusan aktif',
+    'Area kerja terakhir',
+    'Konvensi yang sudah disepakati',
   ];
 
   for (const sec of orderedSections) {
     resultLines.push(`## ${sec}\n`);
     const items = sections[sec] || [];
     if (items.length > 0) {
-      resultLines.push(items.join("\n"));
+      resultLines.push(items.join('\n'));
     }
-    resultLines.push("");
+    resultLines.push('');
   }
 
-  return resultLines.join("\n").trim();
+  return resultLines.join('\n').trim();
 }
 
 export function isCompactionNeeded(
   projectRoot: string,
-  options?: { threshold?: number; maxBytes?: number },
+  options?: { threshold?: number; maxBytes?: number }
 ): { needed: boolean; reason?: string } {
   let threshold = options?.threshold ?? 20;
   const maxBytes = options?.maxBytes ?? 4096;
@@ -107,21 +108,16 @@ export function isCompactionNeeded(
 
   const statePath = getStateFilePath(projectRoot);
   if (!fs.existsSync(statePath)) {
-    return { needed: false, reason: "state.md does not exist" };
+    return { needed: false, reason: 'state.md does not exist' };
   }
 
   const state = readStateFile(projectRoot);
-  const uncompacted = queryDecisions(projectRoot, undefined, {
-    compacted: false,
-  });
+  const uncompacted = queryDecisions(projectRoot, undefined, { compacted: false });
   if (uncompacted.length === 0) {
-    return { needed: false, reason: "No uncompacted decisions present" };
+    return { needed: false, reason: 'No uncompacted decisions present' };
   }
 
-  if (
-    state.frontmatter.session_count > 0 &&
-    state.frontmatter.session_count >= threshold
-  ) {
+  if (state.frontmatter.session_count > 0 && state.frontmatter.session_count >= threshold) {
     return {
       needed: true,
       reason: `Session count (${state.frontmatter.session_count}) reached threshold (${threshold})`,
@@ -136,7 +132,7 @@ export function isCompactionNeeded(
     };
   }
 
-  return { needed: false, reason: "Thresholds not reached" };
+  return { needed: false, reason: 'Thresholds not reached' };
 }
 
 export interface CompactionExecutionResult {
@@ -152,7 +148,7 @@ export async function executeCompaction(
   options: {
     force?: boolean;
     summarizer?: SummarizerFn;
-  } = {},
+  } = {}
 ): Promise<CompactionExecutionResult> {
   const check = isCompactionNeeded(projectRoot);
   if (!options.force && !check.needed) {
@@ -163,13 +159,11 @@ export async function executeCompaction(
       decisionsCompacted: 0,
       previousByteSize: size,
       newByteSize: size,
-      message: check.reason || "Compaction not needed",
+      message: check.reason || 'Compaction not needed',
     };
   }
 
-  const uncompacted = queryDecisions(projectRoot, undefined, {
-    compacted: false,
-  });
+  const uncompacted = queryDecisions(projectRoot, undefined, { compacted: false });
   if (uncompacted.length === 0) {
     const statePath = getStateFilePath(projectRoot);
     const size = fs.existsSync(statePath) ? fs.statSync(statePath).size : 0;
@@ -178,14 +172,12 @@ export async function executeCompaction(
       decisionsCompacted: 0,
       previousByteSize: size,
       newByteSize: size,
-      message: "No uncompacted decisions found to compact.",
+      message: 'No uncompacted decisions found to compact.',
     };
   }
 
   const statePath = getStateFilePath(projectRoot);
-  const previousByteSize = fs.existsSync(statePath)
-    ? fs.statSync(statePath).size
-    : 0;
+  const previousByteSize = fs.existsSync(statePath) ? fs.statSync(statePath).size : 0;
   const currentState = readStateFile(projectRoot);
 
   const summarizer = options.summarizer || defaultCompactState;
@@ -212,3 +204,4 @@ export async function executeCompaction(
     message: `Successfully compacted ${ids.length} decisions.`,
   };
 }
+
