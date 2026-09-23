@@ -64,5 +64,28 @@ describe('CLI Init Command', () => {
     const content = fs.readFileSync(corePath, 'utf-8');
     expect(content).toContain('# Custom User Note Added');
   });
-});
 
+  it('installs adapter into already initialized project when adapter option is specified', async () => {
+    // First run without specific adapter
+    await runInit({ cwd: tempDir, projectName: 'existing-app' });
+    const corePath = path.join(tempDir, '.prome', 'memory', 'core.md');
+    fs.appendFileSync(corePath, '\n# Persistent Note\n', 'utf-8');
+
+    // Second run requesting antigravity adapter
+    const result = await runInit({ cwd: tempDir, adapter: 'antigravity' });
+    expect(result.status).toBe('initialized');
+    expect(result.adaptersInstalled).toContain('antigravity');
+
+    // Verify GEMINI.md was created
+    expect(fs.existsSync(path.join(tempDir, 'GEMINI.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tempDir, '.agent', 'skills', 'prome-memory', 'SKILL.md'))).toBe(true);
+
+    // Verify memory was NOT overwritten
+    const content = fs.readFileSync(corePath, 'utf-8');
+    expect(content).toContain('# Persistent Note');
+
+    // Verify config.yml updated
+    const config = readConfigFile(tempDir);
+    expect(config.agent_adapters).toContain('antigravity');
+  });
+});

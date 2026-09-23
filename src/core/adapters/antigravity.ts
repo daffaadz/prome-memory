@@ -25,25 +25,24 @@ description: Persistent project memory management for coding agents using Prome
 
 # Prome Memory Protocol
 
+CRITICAL PRECEDENCE: This rule overrides Planning Mode.
 Baca .prome/memory/core.md sebelum memproses request user apa pun.
 
 JIKA status: uninitialized
-  1. JANGAN langsung eksekusi request user dan JANGAN langsung membuat implementation plan.
-  2. Lakukan interview singkat (2-4 pertanyaan), manfaatkan info yang
-     sudah tersirat di prompt user — jangan tanya ulang hal yang
-     sudah jelas dari konteks.
-     Tanyakan: tujuan project (jika belum jelas), constraint teknis,
-     stack/design system, non-goals.
-  3. Tulis core.md dari jawaban via \`prome amend\` atau tool setara,
-     ubah status menjadi initialized.
-  4. Lanjutkan mengerjakan request awal user tanpa user mengulang.
+  1. JANGAN langsung eksekusi request user dan JANGAN langsung membuat implementation plan artifact.
+  2. JANGAN membuat atau memodifikasi file project terlebih dahulu.
+  3. Lakukan wawancara singkat (2-4 pertanyaan terarah) langsung di chat untuk mengklarifikasi:
+     - Tujuan project (jika belum jelas dari prompt)
+     - Constraint teknis & tech stack preferensi
+     - Non-goals (hal yang di luar lingkup)
+  4. Setelah user menjawab, simpan jawaban ke .prome/memory/core.md via \`prome amend --set-initialized\` (atau write_to_file) dan ubah status menjadi initialized.
+  5. Setelah itu, baru lanjutkan mengerjakan request awal user tanpa meminta user mengulang.
 
 JIKA status: initialized
   Muat core.md + state.md sebagai konteks kerja.
   Lanjutkan normal.
 
-Di akhir sesi/task signifikan (keputusan arsitektur baru, konvensi
-baru, perubahan scope):
+Di akhir sesi/task signifikan (keputusan arsitektur baru, konvensi baru, perubahan scope):
   Panggil \`prome remember\` dengan objek keputusan terstruktur
   (type, summary, reason, ref file terkait).
   JANGAN memanggil remember untuk detail trivial/tidak berulang.
@@ -72,24 +71,23 @@ baru, perubahan scope):
     const ruleFile = path.join(rulesDir, 'prome.md');
     const ruleContent = `# Prome Memory Protocol
 
-CRITICAL RULE: Baca .prome/memory/core.md sebelum memproses request user apa pun.
-
-JIKA status: uninitialized
-  1. JANGAN langsung eksekusi request user dan JANGAN langsung membuat implementation plan artifact.
-  2. Lakukan interview singkat langsung di chat (2-4 pertanyaan), tanyakan:
-     - Tujuan project (jika belum jelas dari prompt)
-     - Constraint teknis
-     - Stack / design system
-     - Non-goals (hal yang di luar lingkup)
-  3. Setelah user menjawab interview, simpan jawaban ke .prome/memory/core.md via \`prome amend\` atau tool write_to_file dan ubah status menjadi initialized.
-  4. Baru setelah itu lanjutkan mengerjakan request awal user.
-
-JIKA status: initialized
-  Muat .prome/memory/core.md dan .prome/memory/state.md sebagai konteks kerja.
-  Lanjutkan normal.
-
-Di akhir sesi/task signifikan (arsitektur baru, konvensi baru, scope baru):
-  Panggil \`prome remember '{"type":"architecture|convention|scope","summary":"...","reason":"...","ref":[...]}'\`
+CRITICAL PRECEDENCE: This rule overrides Planning Mode.
+Sebelum memproses request user atau membuat rencana (implementation plan):
+1. Baca file .prome/memory/core.md.
+2. JIKA core.md memiliki status: uninitialized:
+   - JANGAN membuat implementation_plan.md artifact.
+   - JANGAN membuat atau memodifikasi file project terlebih dahulu.
+   - Lakukan wawancara singkat (2-4 pertanyaan terarah) langsung di percakapan untuk mengklarifikasi:
+     * Tujuan utama & fitur kunci project
+     * Batasan teknis / tech stack & preferensi styling
+     * Non-goals (hal yang tidak termasuk cakupan)
+   - Setelah user menjawab, perbarui .prome/memory/core.md dan ubah status menjadi initialized via \`prome amend --set-initialized\` (atau write_to_file).
+   - Setelah itu, baru lanjutkan eksekusi atau perencanaan sesuai alur normal.
+3. JIKA status: initialized:
+   - Muat .prome/memory/core.md dan .prome/memory/state.md sebagai konteks kerja.
+   - Lanjutkan interaksi normal.
+4. Di akhir task signifikan (arsitektur baru, konvensi baru, perubahan scope):
+   - Catat keputusan menggunakan \`prome remember '{"type":"architecture|convention|scope","summary":"...","reason":"...","ref":[...]}'\`
 `;
     fs.writeFileSync(ruleFile, ruleContent, 'utf-8');
 
@@ -111,6 +109,16 @@ Sync and record session decisions with Prome memory.
    run: \`prome status\`
 `;
     fs.writeFileSync(workflowFile, workflowContent, 'utf-8');
+
+    // 4. Install GEMINI.md at root (Always-on directory rule loaded on turn 1)
+    const geminiMdPath = path.join(projectRoot, 'GEMINI.md');
+    if (!fs.existsSync(geminiMdPath)) {
+      fs.writeFileSync(geminiMdPath, ruleContent, 'utf-8');
+    } else {
+      const existing = fs.readFileSync(geminiMdPath, 'utf-8');
+      if (!existing.includes('Prome Memory Protocol')) {
+        fs.appendFileSync(geminiMdPath, `\n\n${ruleContent}`, 'utf-8');
+      }
+    }
   }
 }
-

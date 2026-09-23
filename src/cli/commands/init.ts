@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { initCoreFile } from '../../core/memory/core-file.js';
 import { initStateFile } from '../../core/memory/state-file.js';
 import { initDecisionsFile } from '../../core/memory/decisions-log.js';
-import { initConfigFile } from '../../core/memory/config-file.js';
+import { initConfigFile, readConfigFile, writeConfigFile } from '../../core/memory/config-file.js';
 import { detectAdapters } from '../../core/detect-tool.js';
 import { GenericFallbackAdapter } from '../../core/adapters/generic-fallback.js';
 
@@ -45,8 +45,65 @@ export async function runInit(options: InitOptions = {}): Promise<InitResult> {
     }
   }
 
-  // Idempotency check: if .prome already exists, do not overwrite
+  // Idempotency check: if .prome already exists, do not overwrite memory files
   if (fs.existsSync(promeDir)) {
+    // If user explicitly requests an adapter, install/update the adapter hooks
+    if (options.adapter) {
+      const adapters = detectAdapters(projectRoot, options.adapter);
+      const installedAdapters: string[] = [];
+      const filesCreated: string[] = [];
+
+      for (const adapter of adapters) {
+        await adapter.installHooks(projectRoot);
+        installedAdapters.push(adapter.name);
+        if (adapter.name === 'claude-code') {
+          filesCreated.push('.claude/settings.json', '.claude/PROME_INSTRUCTIONS.md');
+        } else if (adapter.name === 'antigravity') {
+          filesCreated.push(
+            'GEMINI.md',
+            '.agent/skills/prome-memory/SKILL.md',
+            '.agent/rules/prome.md',
+            '.agent/workflows/prome-sync.md'
+          );
+        } else if (adapter.name === 'generic-fallback') {
+          filesCreated.push('.prome/inject.md');
+        }
+      }
+
+      try {
+        const config = readConfigFile(projectRoot);
+        const mergedAdapters = Array.from(new Set([...config.agent_adapters, ...installedAdapters]));
+        config.agent_adapters = mergedAdapters;
+        writeConfigFile(projectRoot, config);
+      } catch {
+        initConfigFile(projectRoot, installedAdapters);
+      }
+
+      const result: InitResult = {
+        status: 'initialized',
+        message: `Prome adapter(s) installed successfully: ${installedAdapters.join(', ')}`,
+        projectRoot,
+        projectName,
+        adaptersInstalled: installedAdapters,
+        filesCreated,
+      };
+
+      if (options.json) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        console.log(chalk.green('✔ Prome adapter(s) installed/updated successfully!'));
+        console.log(chalk.cyan('Installed/updated files:'));
+        for (const f of filesCreated) {
+          console.log(`  - ${f}`);
+        }
+        console.log(chalk.cyan('Configured adapters:'));
+        for (const a of installedAdapters) {
+          console.log(`  - ${a}`);
+        }
+      }
+      return result;
+    }
+
     const result: InitResult = {
       status: 'already_initialized',
       message: 'Prome is already initialized in this project.',
@@ -61,6 +118,7 @@ export async function runInit(options: InitOptions = {}): Promise<InitResult> {
     } else {
       console.log(chalk.yellow('Prome is already initialized in this project.'));
       console.log(chalk.dim(`Directory: ${promeDir}`));
+      console.log(chalk.dim('To configure or update an adapter, run: prome init -a <adapter-name>'));
     }
     return result;
   }
@@ -96,6 +154,7 @@ export async function runInit(options: InitOptions = {}): Promise<InitResult> {
       filesCreated.push('.claude/settings.json', '.claude/PROME_INSTRUCTIONS.md');
     } else if (adapter.name === 'antigravity') {
       filesCreated.push(
+        'GEMINI.md',
         '.agent/skills/prome-memory/SKILL.md',
         '.agent/rules/prome.md',
         '.agent/workflows/prome-sync.md'
@@ -140,4 +199,3 @@ export async function runInit(options: InitOptions = {}): Promise<InitResult> {
 
   return result;
 }
-

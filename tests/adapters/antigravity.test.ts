@@ -30,7 +30,7 @@ describe('Antigravity Adapter', () => {
     expect(adapter.detect(tempDir)).toBe(true);
   });
 
-  it('installs SKILL.md and prome-sync workflow into .agent directory', async () => {
+  it('installs SKILL.md, rules, workflows, and GEMINI.md into project', async () => {
     fs.mkdirSync(path.join(tempDir, '.agent'));
     await adapter.installHooks(tempDir);
 
@@ -43,12 +43,40 @@ describe('Antigravity Adapter', () => {
     expect(skillContent).toContain('JIKA status: initialized');
     expect(skillContent).toContain('prome remember');
 
+    const rulePath = path.join(tempDir, '.agent', 'rules', 'prome.md');
+    expect(fs.existsSync(rulePath)).toBe(true);
+    const ruleContent = fs.readFileSync(rulePath, 'utf-8');
+    expect(ruleContent).toContain('CRITICAL PRECEDENCE: This rule overrides Planning Mode.');
+
     const workflowPath = path.join(tempDir, '.agent', 'workflows', 'prome-sync.md');
     expect(fs.existsSync(workflowPath)).toBe(true);
     const workflowContent = fs.readFileSync(workflowPath, 'utf-8');
     expect(workflowContent).toContain('# Prome Sync');
     expect(workflowContent).toContain('prome remember');
     expect(workflowContent).toContain('prome status');
+
+    const geminiMdPath = path.join(tempDir, 'GEMINI.md');
+    expect(fs.existsSync(geminiMdPath)).toBe(true);
+    const geminiMdContent = fs.readFileSync(geminiMdPath, 'utf-8');
+    expect(geminiMdContent).toContain('# Prome Memory Protocol');
+    expect(geminiMdContent).toContain('CRITICAL PRECEDENCE: This rule overrides Planning Mode.');
+  });
+
+  it('appends to existing GEMINI.md if already present without duplicating', async () => {
+    fs.mkdirSync(path.join(tempDir, '.agent'));
+    const geminiMdPath = path.join(tempDir, 'GEMINI.md');
+    fs.writeFileSync(geminiMdPath, '# Existing Project Guidelines\n', 'utf-8');
+
+    await adapter.installHooks(tempDir);
+
+    const content = fs.readFileSync(geminiMdPath, 'utf-8');
+    expect(content).toContain('# Existing Project Guidelines');
+    expect(content).toContain('# Prome Memory Protocol');
+
+    // Run a second time to ensure no duplicate append
+    await adapter.installHooks(tempDir);
+    const count = (content.match(/# Prome Memory Protocol/g) || []).length;
+    expect(count).toBe(1);
   });
 
   it('installs into .gemini if .gemini exists and .agent does not', async () => {
@@ -72,4 +100,3 @@ describe('Antigravity Adapter', () => {
     expect(fs.existsSync(skillPath)).toBe(true);
   });
 });
-
