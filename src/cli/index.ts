@@ -21,9 +21,10 @@ program
 program
   .command('init')
   .description('Initialize Prome memory in the current project (silent and idempotent)')
+  .option('-a, --adapter <adapter>', 'Specify agent adapter to install (e.g. antigravity, claude-code)')
   .option('--json', 'Output result as JSON')
   .action(async (opts) => {
-    await runInit({ json: opts.json });
+    await runInit({ json: opts.json, adapter: opts.adapter });
   });
 
 // status command

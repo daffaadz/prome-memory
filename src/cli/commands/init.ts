@@ -12,6 +12,7 @@ export interface InitOptions {
   json?: boolean;
   cwd?: string;
   projectName?: string;
+  adapter?: string;
 }
 
 export interface InitResult {
@@ -85,7 +86,7 @@ export async function runInit(options: InitOptions = {}): Promise<InitResult> {
   filesCreated.push('.prome/memory/decisions.jsonl');
 
   // 4. Detect tools and install adapters
-  const adapters = detectAdapters(projectRoot);
+  const adapters = detectAdapters(projectRoot, options.adapter);
   const installedAdapters: string[] = [];
 
   for (const adapter of adapters) {
@@ -94,7 +95,11 @@ export async function runInit(options: InitOptions = {}): Promise<InitResult> {
     if (adapter.name === 'claude-code') {
       filesCreated.push('.claude/settings.json', '.claude/PROME_INSTRUCTIONS.md');
     } else if (adapter.name === 'antigravity') {
-      filesCreated.push('.agent/skills/prome-memory/SKILL.md', '.agent/workflows/prome-sync.md');
+      filesCreated.push(
+        '.agent/skills/prome-memory/SKILL.md',
+        '.agent/rules/prome.md',
+        '.agent/workflows/prome-sync.md'
+      );
     } else if (adapter.name === 'generic-fallback') {
       filesCreated.push('.prome/inject.md');
     }
