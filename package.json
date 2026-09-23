@@ -1,10 +1,11 @@
 {
-  "name": "prome",
+  "name": "prome-cli",
   "version": "0.1.0",
   "description": "Persistent, flat-token, project-scoped memory for coding agents",
   "type": "module",
   "bin": {
-    "prome": "./dist/cli/index.js"
+    "prome": "./dist/cli/index.js",
+    "prome-cli": "./dist/cli/index.js"
   },
   "scripts": {
     "build": "tsc",

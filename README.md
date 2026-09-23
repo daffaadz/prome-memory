@@ -27,7 +27,7 @@ Prome is an open-source CLI and memory protocol built on three non-negotiable pr
 Initialize Prome in your project with one command:
 
 ```bash
-npx prome init
+npx prome-cli init
 ```
 
 That's it! Prome automatically:
