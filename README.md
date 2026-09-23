@@ -24,7 +24,19 @@ Prome is an open-source CLI and memory protocol built on three non-negotiable pr
 
 ## Quickstart
 
-Initialize Prome in your project with one command:
+### Option 1: Global Installation (Recommended)
+
+Install once globally so both you and your AI coding agents can directly use the short `prome` command anywhere:
+
+```bash
+npm install -g prome-cli
+# or: pnpm add -g prome-cli
+
+# Then initialize in any project:
+prome init
+```
+
+### Option 2: Run directly via `npx` (No installation needed)
 
 ```bash
 npx prome-cli init
