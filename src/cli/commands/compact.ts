@@ -1,5 +1,8 @@
-import chalk from 'chalk';
-import { executeCompaction, CompactionExecutionResult } from '../../core/memory/compaction.js';
+import chalk from "chalk";
+import {
+  executeCompaction,
+  CompactionExecutionResult,
+} from "../../core/memory/compaction.js";
 
 export interface CompactOptions {
   force?: boolean;
@@ -7,7 +10,9 @@ export interface CompactOptions {
   cwd?: string;
 }
 
-export async function runCompact(options: CompactOptions = {}): Promise<CompactionExecutionResult> {
+export async function runCompact(
+  options: CompactOptions = {},
+): Promise<CompactionExecutionResult> {
   const projectRoot = options.cwd || process.cwd();
 
   const result = await executeCompaction(projectRoot, {
@@ -19,11 +24,19 @@ export async function runCompact(options: CompactOptions = {}): Promise<Compacti
   } else {
     if (result.compacted) {
       console.log(chalk.green(`✔ ${result.message}`));
-      console.log(chalk.dim(`  State size: ${result.previousByteSize} B -> ${result.newByteSize} B`));
-      console.log(chalk.dim(`  Decisions compacted: ${result.decisionsCompacted}`));
+      console.log(
+        chalk.dim(
+          `  State size: ${result.previousByteSize} B -> ${result.newByteSize} B`,
+        ),
+      );
+      console.log(
+        chalk.dim(`  Decisions compacted: ${result.decisionsCompacted}`),
+      );
     } else {
       console.log(chalk.yellow(`ℹ ${result.message}`));
-      console.log(chalk.dim('  Use --force to run compaction unconditionally.'));
+      console.log(
+        chalk.dim("  Use --force to run compaction unconditionally."),
+      );
     }
   }
 

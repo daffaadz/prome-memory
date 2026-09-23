@@ -1,13 +1,13 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { Adapter } from './adapter.interface.js';
+import fs from "node:fs";
+import path from "node:path";
+import { Adapter } from "./adapter.interface.js";
 
 export class AntigravityAdapter implements Adapter {
-  name = 'antigravity';
+  name = "antigravity";
 
   detect(projectRoot: string): boolean {
-    const agentDir = path.join(projectRoot, '.agent');
-    const geminiDir = path.join(projectRoot, '.gemini');
+    const agentDir = path.join(projectRoot, ".agent");
+    const geminiDir = path.join(projectRoot, ".gemini");
     return fs.existsSync(agentDir) || fs.existsSync(geminiDir);
   }
 
@@ -46,22 +46,25 @@ baru, perubahan scope):
 
   async installHooks(projectRoot: string): Promise<void> {
     // Determine base folder: prefer .agent, fallback to .gemini if only .gemini exists
-    const agentDir = path.join(projectRoot, '.agent');
-    const geminiDir = path.join(projectRoot, '.gemini');
-    const baseDir = fs.existsSync(geminiDir) && !fs.existsSync(agentDir) ? geminiDir : agentDir;
+    const agentDir = path.join(projectRoot, ".agent");
+    const geminiDir = path.join(projectRoot, ".gemini");
+    const baseDir =
+      fs.existsSync(geminiDir) && !fs.existsSync(agentDir)
+        ? geminiDir
+        : agentDir;
 
-    const skillDir = path.join(baseDir, 'skills', 'prome-memory');
+    const skillDir = path.join(baseDir, "skills", "prome-memory");
     if (!fs.existsSync(skillDir)) {
       fs.mkdirSync(skillDir, { recursive: true });
     }
-    const skillFile = path.join(skillDir, 'SKILL.md');
-    fs.writeFileSync(skillFile, this.injectMemoryTemplate(), 'utf-8');
+    const skillFile = path.join(skillDir, "SKILL.md");
+    fs.writeFileSync(skillFile, this.injectMemoryTemplate(), "utf-8");
 
-    const workflowDir = path.join(baseDir, 'workflows');
+    const workflowDir = path.join(baseDir, "workflows");
     if (!fs.existsSync(workflowDir)) {
       fs.mkdirSync(workflowDir, { recursive: true });
     }
-    const workflowFile = path.join(workflowDir, 'prome-sync.md');
+    const workflowFile = path.join(workflowDir, "prome-sync.md");
     const workflowContent = `# Prome Sync
 
 Sync and record session decisions with Prome memory.
@@ -73,6 +76,6 @@ Sync and record session decisions with Prome memory.
 3. Check memory status:
    run: \`prome status\`
 `;
-    fs.writeFileSync(workflowFile, workflowContent, 'utf-8');
+    fs.writeFileSync(workflowFile, workflowContent, "utf-8");
   }
 }

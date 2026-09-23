@@ -1,6 +1,10 @@
-import chalk from 'chalk';
-import { readCoreFile } from '../../core/memory/core-file.js';
-import { readStateFile, touchStateFile, incrementSessionCount } from '../../core/memory/state-file.js';
+import chalk from "chalk";
+import { readCoreFile } from "../../core/memory/core-file.js";
+import {
+  readStateFile,
+  touchStateFile,
+  incrementSessionCount,
+} from "../../core/memory/state-file.js";
 
 export interface ContextOptions {
   inject?: boolean;
@@ -10,7 +14,7 @@ export interface ContextOptions {
 }
 
 export interface ContextResult {
-  status: 'uninitialized' | 'initialized';
+  status: "uninitialized" | "initialized";
   context: string;
   sessionCount: number;
 }
@@ -19,7 +23,7 @@ export function buildInjectedContext(projectRoot: string): ContextResult {
   const core = readCoreFile(projectRoot);
   const state = readStateFile(projectRoot);
 
-  if (core.frontmatter.status === 'uninitialized') {
+  if (core.frontmatter.status === "uninitialized") {
     const interviewPrompt = `# Prome Context (UNINITIALIZED)
 
 Status: uninitialized
@@ -33,7 +37,7 @@ PROTOCAL INSTRUCTIONS:
 4. Lanjutkan mengerjakan request awal user tanpa user mengulang.
 `;
     return {
-      status: 'uninitialized',
+      status: "uninitialized",
       context: interviewPrompt,
       sessionCount: state.frontmatter.session_count,
     };
@@ -55,13 +59,15 @@ ${state.body}
 `;
 
   return {
-    status: 'initialized',
+    status: "initialized",
     context: activeContext,
     sessionCount: state.frontmatter.session_count,
   };
 }
 
-export async function runContext(options: ContextOptions = {}): Promise<ContextResult> {
+export async function runContext(
+  options: ContextOptions = {},
+): Promise<ContextResult> {
   const projectRoot = options.cwd || process.cwd();
 
   if (options.updateIfChanged) {

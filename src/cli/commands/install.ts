@@ -1,8 +1,8 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { execSync } from 'node:child_process';
-import chalk from 'chalk';
-import { readConfigFile } from '../../core/memory/config-file.js';
+import fs from "node:fs";
+import path from "node:path";
+import { execSync } from "node:child_process";
+import chalk from "chalk";
+import { readConfigFile } from "../../core/memory/config-file.js";
 
 export interface InstallOptions {
   name?: string;
@@ -11,7 +11,7 @@ export interface InstallOptions {
 }
 
 export interface InstallResult {
-  status: 'success' | 'error';
+  status: "success" | "error";
   skillName?: string;
   targetPaths: string[];
   error?: string;
@@ -19,10 +19,10 @@ export interface InstallResult {
 
 export async function runInstall(
   source: string,
-  options: InstallOptions = {}
+  options: InstallOptions = {},
 ): Promise<InstallResult> {
   const projectRoot = options.cwd || process.cwd();
-  const promeSkillsDir = path.join(projectRoot, '.prome', 'skills');
+  const promeSkillsDir = path.join(projectRoot, ".prome", "skills");
 
   if (!fs.existsSync(promeSkillsDir)) {
     fs.mkdirSync(promeSkillsDir, { recursive: true });
@@ -31,17 +31,18 @@ export async function runInstall(
   // Derive skill name
   let skillName = options.name;
   if (!skillName) {
-    if (source.endsWith('.git')) {
-      skillName = path.basename(source, '.git');
+    if (source.endsWith(".git")) {
+      skillName = path.basename(source, ".git");
     } else {
       skillName = path.basename(source);
     }
   }
 
-  const isGitUrl = source.startsWith('http://') ||
-    source.startsWith('https://') ||
-    source.startsWith('git@') ||
-    source.startsWith('ssh://');
+  const isGitUrl =
+    source.startsWith("http://") ||
+    source.startsWith("https://") ||
+    source.startsWith("git@") ||
+    source.startsWith("ssh://");
 
   const promeTarget = path.join(promeSkillsDir, skillName);
   const targetPaths: string[] = [promeTarget];
@@ -49,8 +50,8 @@ export async function runInstall(
   // Check if Antigravity is active, install there too
   try {
     const config = readConfigFile(projectRoot);
-    if (config.agent_adapters.includes('antigravity')) {
-      const agentTarget = path.join(projectRoot, '.agent', 'skills', skillName);
+    if (config.agent_adapters.includes("antigravity")) {
+      const agentTarget = path.join(projectRoot, ".agent", "skills", skillName);
       targetPaths.push(agentTarget);
     }
   } catch {
@@ -63,7 +64,7 @@ export async function runInstall(
         fs.rmSync(promeTarget, { recursive: true, force: true });
       }
       execSync(`git clone --depth 1 "${source}" "${promeTarget}"`, {
-        stdio: 'pipe',
+        stdio: "pipe",
       });
     } else {
       const resolvedSource = path.resolve(projectRoot, source);
@@ -80,7 +81,10 @@ export async function runInstall(
         fs.cpSync(resolvedSource, promeTarget, { recursive: true });
       } else {
         fs.mkdirSync(promeTarget, { recursive: true });
-        fs.copyFileSync(resolvedSource, path.join(promeTarget, path.basename(resolvedSource)));
+        fs.copyFileSync(
+          resolvedSource,
+          path.join(promeTarget, path.basename(resolvedSource)),
+        );
       }
     }
 
@@ -97,7 +101,7 @@ export async function runInstall(
     }
 
     const result: InstallResult = {
-      status: 'success',
+      status: "success",
       skillName,
       targetPaths,
     };
@@ -105,7 +109,9 @@ export async function runInstall(
     if (options.json) {
       console.log(JSON.stringify(result, null, 2));
     } else {
-      console.log(chalk.green(`✔ Skill '${skillName}' installed successfully!`));
+      console.log(
+        chalk.green(`✔ Skill '${skillName}' installed successfully!`),
+      );
       for (const t of targetPaths) {
         console.log(chalk.dim(`  - ${path.relative(projectRoot, t)}`));
       }
@@ -115,7 +121,7 @@ export async function runInstall(
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     const result: InstallResult = {
-      status: 'error',
+      status: "error",
       skillName,
       targetPaths: [],
       error: errorMsg,

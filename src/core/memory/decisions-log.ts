@@ -1,16 +1,16 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 import {
   Decision,
   DecisionInput,
   DecisionInputSchema,
   DecisionSchema,
   DecisionType,
-} from './schemas.js';
-import { touchStateFile } from './state-file.js';
+} from "./schemas.js";
+import { touchStateFile } from "./state-file.js";
 
 export function getDecisionsFilePath(projectRoot: string): string {
-  return path.join(projectRoot, '.prome', 'memory', 'decisions.jsonl');
+  return path.join(projectRoot, ".prome", "memory", "decisions.jsonl");
 }
 
 export function initDecisionsFile(projectRoot: string): void {
@@ -20,18 +20,20 @@ export function initDecisionsFile(projectRoot: string): void {
     fs.mkdirSync(dirPath, { recursive: true });
   }
   if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, '', 'utf-8');
+    fs.writeFileSync(filePath, "", "utf-8");
   }
 }
 
 export function readAllDecisions(projectRoot: string): Decision[] {
   const filePath = getDecisionsFilePath(projectRoot);
   if (!fs.existsSync(filePath)) {
-    throw new Error(`decisions.jsonl not found at ${filePath}. Run 'prome init' first.`);
+    throw new Error(
+      `decisions.jsonl not found at ${filePath}. Run 'prome init' first.`,
+    );
   }
 
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const lines = content.split('\n');
+  const content = fs.readFileSync(filePath, "utf-8");
+  const lines = content.split("\n");
   const decisions: Decision[] = [];
 
   for (let i = 0; i < lines.length; i++) {
@@ -43,17 +45,17 @@ export function readAllDecisions(projectRoot: string): Decision[] {
       parsedJson = JSON.parse(line);
     } catch (err) {
       throw new Error(
-        `Failed to parse JSON on line ${i + 1} of decisions.jsonl: ${err instanceof Error ? err.message : String(err)}`
+        `Failed to parse JSON on line ${i + 1} of decisions.jsonl: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
 
     const parseResult = DecisionSchema.safeParse(parsedJson);
     if (!parseResult.success) {
       const errorDetails = parseResult.error.errors
-        .map((e) => `${e.path.join('.')}: ${e.message}`)
-        .join(', ');
+        .map((e) => `${e.path.join(".")}: ${e.message}`)
+        .join(", ");
       throw new Error(
-        `Invalid decision schema on line ${i + 1} of decisions.jsonl: ${errorDetails}`
+        `Invalid decision schema on line ${i + 1} of decisions.jsonl: ${errorDetails}`,
       );
     }
 
@@ -75,18 +77,18 @@ export function getNextDecisionId(decisions: Decision[]): string {
     }
   }
   const nextNum = maxId + 1;
-  return `d-${String(nextNum).padStart(4, '0')}`;
+  return `d-${String(nextNum).padStart(4, "0")}`;
 }
 
 export function appendDecision(
   projectRoot: string,
-  input: DecisionInput
+  input: DecisionInput,
 ): Decision {
   const inputValidation = DecisionInputSchema.safeParse(input);
   if (!inputValidation.success) {
     const errorDetails = inputValidation.error.errors
-      .map((e) => `${e.path.join('.')}: ${e.message}`)
-      .join(', ');
+      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .join(", ");
     throw new Error(`Invalid decision input: ${errorDetails}`);
   }
 
@@ -108,13 +110,15 @@ export function appendDecision(
   const validation = DecisionSchema.safeParse(newDecision);
   if (!validation.success) {
     const errorDetails = validation.error.errors
-      .map((e) => `${e.path.join('.')}: ${e.message}`)
-      .join(', ');
-    throw new Error(`Constructed decision failed schema validation: ${errorDetails}`);
+      .map((e) => `${e.path.join(".")}: ${e.message}`)
+      .join(", ");
+    throw new Error(
+      `Constructed decision failed schema validation: ${errorDetails}`,
+    );
   }
 
   const filePath = getDecisionsFilePath(projectRoot);
-  fs.appendFileSync(filePath, JSON.stringify(validation.data) + '\n', 'utf-8');
+  fs.appendFileSync(filePath, JSON.stringify(validation.data) + "\n", "utf-8");
 
   // Update state.md timestamp per spec
   try {
@@ -135,10 +139,10 @@ export interface QueryDecisionsOptions {
 export function queryDecisions(
   projectRoot: string,
   query?: string,
-  options?: QueryDecisionsOptions
+  options?: QueryDecisionsOptions,
 ): Decision[] {
   const decisions = readAllDecisions(projectRoot);
-  const lowerQuery = query ? query.toLowerCase().trim() : '';
+  const lowerQuery = query ? query.toLowerCase().trim() : "";
 
   return decisions.filter((d) => {
     if (options?.type && d.type !== options.type) {
@@ -171,7 +175,7 @@ export function queryDecisions(
 
 export function markDecisionsCompacted(
   projectRoot: string,
-  decisionIds: string[]
+  decisionIds: string[],
 ): void {
   const decisions = readAllDecisions(projectRoot);
   const idSet = new Set(decisionIds);
@@ -184,8 +188,6 @@ export function markDecisionsCompacted(
   });
 
   const filePath = getDecisionsFilePath(projectRoot);
-  const content = updatedDecisions
-    .map((d) => JSON.stringify(d))
-    .join('\n');
-  fs.writeFileSync(filePath, content ? content + '\n' : '', 'utf-8');
+  const content = updatedDecisions.map((d) => JSON.stringify(d)).join("\n");
+  fs.writeFileSync(filePath, content ? content + "\n" : "", "utf-8");
 }
